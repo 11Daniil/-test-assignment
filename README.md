@@ -41,7 +41,6 @@ npm run dev            # dev-сервер
 npm run build          # production-сборка
 npm run lint           # ESLint
 npm run format:check   # проверка форматирования
-npm test               # тесты Jest
 npm run validate       # все проверки и сборка
 ```
 
@@ -55,5 +54,4 @@ src/
 ├── data/           данные товаров
 ├── utils/          поиск, корзина и форматирование цен
 └── views/          композиция страницы
-tests/              тесты
 ```

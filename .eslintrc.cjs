@@ -24,12 +24,4 @@ module.exports = {
     'vue/multi-word-component-names': ['error', { ignores: ['App'] }],
     'vue/no-v-html': 'error',
   },
-  overrides: [
-    {
-      files: ['tests/**/*.js'],
-      env: {
-        jest: true,
-      },
-    },
-  ],
 };
