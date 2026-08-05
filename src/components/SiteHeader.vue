@@ -11,27 +11,25 @@
         <a href="#about">О компании</a>
       </nav>
 
-      <form class="site-header__search" role="search" @submit.prevent>
-        <label class="sr-only" for="catalog-search">Поиск по названию картины</label>
-        <input
-          id="catalog-search"
-          :value="searchQuery"
-          type="search"
-          autocomplete="off"
-          placeholder="Поиск по названию картины"
-          @input="$emit('update:search-query', $event.target.value)"
-        />
-        <button type="submit">Найти</button>
-      </form>
+      <CatalogSearch :value="value" @input="$emit('input', $event)" />
     </div>
   </header>
 </template>
 
 <script>
+import CatalogSearch from './catalog/CatalogSearch.vue';
+
 export default {
   name: 'SiteHeader',
+  components: {
+    CatalogSearch,
+  },
+  model: {
+    prop: 'value',
+    event: 'input',
+  },
   props: {
-    searchQuery: {
+    value: {
       type: String,
       default: '',
     },
@@ -95,58 +93,6 @@ export default {
   transform: scaleX(1);
 }
 
-.site-header__search {
-  display: flex;
-  width: 448px;
-  height: 48px;
-  flex: 0 0 448px;
-}
-
-.site-header__search input {
-  width: 326px;
-  min-width: 0;
-  padding: 0 16px;
-  border: 1px solid var(--color-border);
-  border-right: 0;
-  border-radius: 0;
-  outline: 0;
-  background: transparent;
-  appearance: none;
-  font-size: 14px;
-  line-height: 21px;
-}
-
-.site-header__search input::placeholder {
-  color: #aaa5a2;
-  opacity: 1;
-}
-
-.site-header__search input:focus {
-  border-color: var(--color-action);
-  box-shadow: inset 0 0 0 1px var(--color-action);
-}
-
-.site-header__search input::-webkit-search-cancel-button {
-  cursor: pointer;
-}
-
-.site-header__search button {
-  width: 122px;
-  flex: 0 0 122px;
-  border: 1px solid var(--color-action);
-  color: #fff;
-  background: var(--color-action);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  transition: background-color 160ms ease, border-color 160ms ease;
-}
-
-.site-header__search button:hover {
-  border-color: var(--color-action-hover);
-  background: var(--color-action-hover);
-}
-
 @media (max-width: 1279px) {
   .site-header__inner {
     gap: 44px;
@@ -154,20 +100,6 @@ export default {
 
   .site-header__nav {
     gap: 24px;
-  }
-
-  .site-header__search {
-    width: 380px;
-    flex-basis: 380px;
-  }
-
-  .site-header__search input {
-    width: 270px;
-  }
-
-  .site-header__search button {
-    width: 110px;
-    flex-basis: 110px;
   }
 }
 
@@ -182,6 +114,7 @@ export default {
     min-height: 124px;
     grid-template-columns: auto minmax(280px, 1fr);
     gap: 16px 28px;
+    justify-content: stretch;
     padding-top: 16px;
     padding-bottom: 16px;
   }
@@ -190,24 +123,23 @@ export default {
     display: block;
   }
 
-  .site-header__search {
-    width: 100%;
-    flex-basis: auto;
-  }
-
-  .site-header__search input {
-    width: auto;
-    flex: 1 1 auto;
-  }
-
   .site-header__nav {
+    min-width: 0;
+    max-width: 100%;
     width: 100%;
     grid-column: 1 / -1;
     justify-content: space-between;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .site-header__nav::-webkit-scrollbar {
+    display: none;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 639px) {
   .site-header__inner {
     display: flex;
     min-height: 0;
@@ -221,32 +153,11 @@ export default {
     width: 100%;
   }
 
-  .site-header__search {
-    height: 46px;
-    order: 2;
-  }
-
-  .site-header__search input {
-    padding: 0 12px;
-    font-size: 13px;
-  }
-
-  .site-header__search button {
-    width: 88px;
-    flex-basis: 88px;
-  }
-
   .site-header__nav {
     justify-content: flex-start;
     order: 3;
     gap: 24px;
-    overflow-x: auto;
     padding: 2px 1px 6px;
-    scrollbar-width: none;
-  }
-
-  .site-header__nav::-webkit-scrollbar {
-    display: none;
   }
 }
 </style>

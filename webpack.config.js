@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 
 module.exports = (_, argv) => {
@@ -13,7 +14,7 @@ module.exports = (_, argv) => {
       filename: isProduction ? 'assets/js/[name].[contenthash:8].js' : 'assets/js/[name].js',
       assetModuleFilename: 'assets/media/[name].[contenthash:8][ext][query]',
       clean: true,
-      publicPath: '/',
+      publicPath: 'auto',
     },
     devtool: isProduction ? false : 'eval-cheap-module-source-map',
     devServer: {
@@ -49,21 +50,12 @@ module.exports = (_, argv) => {
             loader: 'babel-loader',
             options: {
               cacheDirectory: true,
-              presets: [
-                [
-                  '@babel/preset-env',
-                  {
-                    bugfixes: true,
-                    useBuiltIns: false,
-                  },
-                ],
-              ],
             },
           },
         },
         {
           test: /\.css$/i,
-          use: ['style-loader', 'css-loader'],
+          use: [isProduction ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader'],
         },
         {
           test: /\.(png|jpe?g|gif|webp|avif|svg)$/i,
@@ -89,7 +81,12 @@ module.exports = (_, argv) => {
         template: path.resolve(__dirname, 'public/index.html'),
         inject: 'body',
       }),
-    ],
+      isProduction &&
+        new MiniCssExtractPlugin({
+          filename: 'assets/css/[name].[contenthash:8].css',
+          chunkFilename: 'assets/css/[id].[contenthash:8].css',
+        }),
+    ].filter(Boolean),
     optimization: {
       splitChunks: {
         chunks: 'all',

@@ -1,112 +1,121 @@
-const commonsImage = (fileName, width = 1600) =>
-  `https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(fileName)}?width=${width}`;
+import { createProduct, PRODUCT_STATUS } from '../domain/product';
 
-const imageSources = {
-  venus: [
-    commonsImage('Birth_of_Venus.jpg', 1200),
-    commonsImage('The_Birth_of_Venus_(Botticelli)_1.jpg'),
-  ],
-  'last-supper': [
-    commonsImage('Leonardo_da_Vinci_-_The_Last_Supper_high_res.jpg'),
-    commonsImage('The_Last_Supper_Leonardo_Da_Vinci_-_High_Resolution.jpg'),
-  ],
-  'creation-adam': [
-    commonsImage('Michelangelo,_The_Creation_of_Adam.jpg'),
-    commonsImage('The_Creation_of_Adam_by_Michelangelo.JPG'),
-  ],
-  'anatomy-lesson': [
-    commonsImage('Rembrandt_-_The_Anatomy_Lesson_of_Dr._Nicolaes_Tulp.jpg'),
-    commonsImage('Rembrandt_-_The_Anatomy_Lesson_of_Dr_Nicolaes_Tulp.jpg'),
-  ],
-};
+const commonsImage = (fileName, width) =>
+  `https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(
+    fileName,
+  )}?width=${width}`;
 
-const imagePath = (name) => imageSources[name][0];
+const createGalleryImage = ({ productId, title, fileName, position, zoom }, index) => ({
+  id: `${productId}-${index + 1}`,
+  src: commonsImage(fileName, 1600),
+  thumbnailSrc: commonsImage(fileName, 640),
+  alt: `${title} — изображение ${index + 1}`,
+  position,
+  zoom,
+});
 
-const createSlides = (name, title, views) => {
-  const sources = imageSources[name];
+const createGallery = (productId, title, images) =>
+  images.map((image, index) => createGalleryImage({ productId, title, ...image }, index));
 
-  return views.map(({ position, zoom }, index) => ({
-    id: `${name}-${index + 1}`,
-    src: sources[index],
-    alt: `${title} — фрагмент ${index + 1}`,
-    position,
-    zoom,
-  }));
-};
+export const DEFAULT_CART_PRODUCT_IDS = Object.freeze(['creation-adam']);
 
-export const products = [
-  {
+export const products = Object.freeze([
+  createProduct({
     id: 'venus',
     title: 'Рождение Венеры',
     author: 'Сандро Боттичелли',
-    image: imagePath('venus'),
-    oldPrice: '2 000 000 $',
-    price: '1 000 000 $',
-    available: true,
-    sold: false,
-    initiallyInCart: false,
-    auctionText: '',
     description:
       'Знаменитая работа Боттичелли, в которой богиня Венера появляется из морской пены и приближается к берегу.',
-    slides: createSlides('venus', 'Рождение Венеры', [
-      { position: '50% 50%', zoom: 1 },
-      { position: '48% 42%', zoom: 1.7 },
+    status: PRODUCT_STATUS.AVAILABLE,
+    price: {
+      current: 1_000_000,
+      previous: 2_000_000,
+      currency: 'USD',
+    },
+    images: createGallery('venus', 'Рождение Венеры', [
+      {
+        fileName: 'Birth_of_Venus.jpg',
+        position: '50% 50%',
+        zoom: 1,
+      },
+      {
+        fileName: 'The_Birth_of_Venus_(Botticelli)_1.jpg',
+        position: '48% 42%',
+        zoom: 1.7,
+      },
     ]),
-  },
-  {
+  }),
+  createProduct({
     id: 'last-supper',
     title: 'Тайная вечеря',
     author: 'Леонардо да Винчи',
-    image: imagePath('last-supper'),
-    oldPrice: null,
-    price: '3 000 000 $',
-    available: true,
-    sold: false,
-    initiallyInCart: false,
-    auctionText: '',
     description:
       'Монументальная композиция Леонардо да Винчи изображает реакцию апостолов на слова Христа о предательстве.',
-    slides: createSlides('last-supper', 'Тайная вечеря', [
-      { position: '50% 50%', zoom: 1 },
-      { position: '50% 45%', zoom: 1.8 },
+    status: PRODUCT_STATUS.AVAILABLE,
+    price: {
+      current: 3_000_000,
+      previous: null,
+      currency: 'USD',
+    },
+    images: createGallery('last-supper', 'Тайная вечеря', [
+      {
+        fileName: 'Leonardo_da_Vinci_-_The_Last_Supper_high_res.jpg',
+        position: '50% 50%',
+        zoom: 1,
+      },
+      {
+        fileName: 'The_Last_Supper_Leonardo_Da_Vinci_-_High_Resolution.jpg',
+        position: '50% 45%',
+        zoom: 1.8,
+      },
     ]),
-  },
-  {
+  }),
+  createProduct({
     id: 'creation-adam',
     title: 'Сотворение Адама',
     author: 'Микеланджело',
-    image: imagePath('creation-adam'),
-    oldPrice: '6 000 000 $',
-    price: '5 000 000 $',
-    available: true,
-    sold: false,
-    initiallyInCart: true,
-    auctionText: '',
     description:
       'Фрагмент росписи Сикстинской капеллы, запечатлевший момент, когда Бог передаёт Адаму жизненную силу.',
-    slides: createSlides('creation-adam', 'Сотворение Адама', [
-      { position: '50% 50%', zoom: 1 },
-      { position: '52% 47%', zoom: 1.9 },
+    status: PRODUCT_STATUS.AVAILABLE,
+    price: {
+      current: 5_000_000,
+      previous: 6_000_000,
+      currency: 'USD',
+    },
+    images: createGallery('creation-adam', 'Сотворение Адама', [
+      {
+        fileName: 'Michelangelo,_The_Creation_of_Adam.jpg',
+        position: '50% 50%',
+        zoom: 1,
+      },
+      {
+        fileName: 'The_Creation_of_Adam_by_Michelangelo.JPG',
+        position: '52% 47%',
+        zoom: 1.9,
+      },
     ]),
-  },
-  {
+  }),
+  createProduct({
     id: 'anatomy-lesson',
     title: 'Урок анатомии',
     author: 'Рембрандт',
-    image: imagePath('anatomy-lesson'),
-    oldPrice: null,
-    price: null,
-    available: false,
-    sold: true,
-    initiallyInCart: false,
-    auctionText: 'Продана на аукционе',
     description:
       'Групповой портрет Рембрандта показывает публичную лекцию доктора Тульпа и внимательных членов гильдии хирургов.',
-    slides: createSlides('anatomy-lesson', 'Урок анатомии', [
-      { position: '50% 50%', zoom: 1 },
-      { position: '48% 32%', zoom: 1.75 },
+    status: PRODUCT_STATUS.SOLD,
+    soldLabel: 'Продана на аукционе',
+    images: createGallery('anatomy-lesson', 'Урок анатомии', [
+      {
+        fileName: 'Rembrandt_-_The_Anatomy_Lesson_of_Dr._Nicolaes_Tulp.jpg',
+        position: '50% 50%',
+        zoom: 1,
+      },
+      {
+        fileName: 'Rembrandt_-_The_Anatomy_Lesson_of_Dr_Nicolaes_Tulp.jpg',
+        position: '48% 32%',
+        zoom: 1.75,
+      },
     ]),
-  },
-];
+  }),
+]);
 
 export default products;

@@ -12,7 +12,9 @@
       <div class="site-footer__contacts">
         <a class="site-footer__contact" href="tel:+78125555555">
           <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="M7.2 3.5 10 8 7.8 9.8c1 2.2 2.8 4 5 5l1.9-2.2 4.4 2.8-.8 3.1c-.2.8-1 1.3-1.8 1.3C9.6 19.3 4.1 13.8 3.7 6.9c-.1-.8.5-1.6 1.3-1.8l2.2-.6Z" />
+            <path
+              d="M7.2 3.5 10 8 7.8 9.8c1 2.2 2.8 4 5 5l1.9-2.2 4.4 2.8-.8 3.1c-.2.8-1 1.3-1.8 1.3C9.6 19.3 4.1 13.8 3.7 6.9c-.1-.8.5-1.6 1.3-1.8l2.2-.6Z"
+            />
           </svg>
           <span>+7 (812) 555-55-55</span>
         </a>
@@ -142,7 +144,7 @@ export default {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 639px) {
   .site-footer__inner {
     display: block;
     padding-top: 28px;

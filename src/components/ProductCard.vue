@@ -1,71 +1,67 @@
 <template>
-  <article class="product-card" :class="{ 'product-card--sold': product.sold }">
+  <article class="product-card" :class="{ 'product-card--sold': isSold }">
     <button
       class="product-card__image-button"
       type="button"
       :aria-label="`Открыть карточку: ${product.title}`"
-      @click="$emit('open')"
+      @click="selectProduct"
     >
       <img
+        v-if="!imageFailed"
         class="product-card__image"
-        :src="product.image"
+        :src="primaryImage.thumbnailSrc"
         :alt="`${product.title}, ${product.author}`"
         width="280"
         height="160"
         loading="lazy"
+        decoding="async"
+        @error="imageFailed = true"
       />
+      <span
+        v-else
+        class="product-card__image-placeholder"
+        role="img"
+        :aria-label="`Изображение картины «${product.title}» временно недоступно`"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M4 5h16v14H4zM4 16l4.5-4.5 3 3L14 12l6 5" />
+          <circle cx="15.5" cy="8.5" r="1.5" />
+        </svg>
+        <span>Изображение недоступно</span>
+      </span>
     </button>
 
     <div class="product-card__body">
-      <button class="product-card__title" type="button" @click="$emit('open')">
+      <button class="product-card__title" type="button" @click="selectProduct">
         <span>«{{ product.title }}»</span>
         <span>{{ product.author }}</span>
       </button>
 
       <div class="product-card__purchase-row">
-        <div v-if="product.available" class="product-card__price">
-          <span v-if="product.oldPrice" class="product-card__old-price">
-            {{ product.oldPrice }}
-          </span>
-          <strong>{{ product.price }}</strong>
-        </div>
-        <p v-else class="product-card__auction">{{ product.auctionText }}</p>
-
-        <button
-          v-if="product.available"
-          class="purchase-button"
-          :class="`purchase-button--${purchaseState}`"
-          type="button"
-          :disabled="purchaseState !== 'idle'"
-          :aria-busy="purchaseState === 'processing' ? 'true' : 'false'"
-          @click="$emit('buy')"
-        >
-          <svg
-            v-if="purchaseState === 'processing'"
-            class="purchase-button__spinner"
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="9" />
-          </svg>
-          <svg
-            v-else-if="purchaseState === 'in-cart'"
-            class="purchase-button__check"
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-          >
-            <path d="m5 12.5 4.2 4.2L19 7" />
-          </svg>
-          <span>{{ buttonLabel }}</span>
-        </button>
+        <ProductPrice :product="product" variant="card" />
+        <PurchaseButton
+          v-if="isAvailable"
+          :state="purchaseState"
+          variant="compact"
+          @purchase="requestPurchase"
+        />
       </div>
     </div>
   </article>
 </template>
 
 <script>
+import { isProductAvailable, PRODUCT_STATUS } from '../domain/product';
+import { isPurchaseState, PURCHASE_STATE } from '../domain/purchase';
+import ProductPrice from './ui/ProductPrice.vue';
+import PurchaseButton from './ui/PurchaseButton.vue';
+
 export default {
   name: 'ProductCard',
+  components: {
+    ProductPrice,
+    PurchaseButton,
+  },
   props: {
     product: {
       type: Object,
@@ -73,19 +69,37 @@ export default {
     },
     purchaseState: {
       type: String,
-      default: 'idle',
-      validator: (value) => ['idle', 'processing', 'in-cart'].includes(value),
+      default: PURCHASE_STATE.IDLE,
+      validator: isPurchaseState,
     },
   },
+  data() {
+    return {
+      imageFailed: false,
+    };
+  },
   computed: {
-    buttonLabel() {
-      const labels = {
-        idle: 'Купить',
-        processing: 'Обрабатывается',
-        'in-cart': 'В корзине',
-      };
-
-      return labels[this.purchaseState];
+    primaryImage() {
+      return this.product.images[0];
+    },
+    isAvailable() {
+      return isProductAvailable(this.product);
+    },
+    isSold() {
+      return this.product.status === PRODUCT_STATUS.SOLD;
+    },
+  },
+  watch: {
+    'primaryImage.src'() {
+      this.imageFailed = false;
+    },
+  },
+  methods: {
+    selectProduct() {
+      this.$emit('select-product', this.product.id);
+    },
+    requestPurchase() {
+      this.$emit('purchase-request', this.product.id);
     },
   },
 };
@@ -133,15 +147,39 @@ export default {
   overflow: hidden;
 }
 
-.product-card__image {
+.product-card__image,
+.product-card__image-placeholder {
   width: 100%;
   height: 160px;
+}
+
+.product-card__image {
   object-fit: cover;
   transition: transform 300ms ease;
 }
 
 .product-card__image-button:hover .product-card__image {
   transform: scale(1.025);
+}
+
+.product-card__image-placeholder {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: #766e6a;
+  background: #e8e3e0;
+  font-size: 11px;
+}
+
+.product-card__image-placeholder svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.4;
 }
 
 .product-card__body {
@@ -182,106 +220,6 @@ export default {
   margin-top: auto;
 }
 
-.product-card__price {
-  display: flex;
-  min-width: 92px;
-  min-height: 44px;
-  flex-direction: column;
-  justify-content: flex-end;
-  white-space: nowrap;
-}
-
-.product-card__old-price {
-  color: var(--color-muted);
-  font-size: 14px;
-  font-weight: 300;
-  line-height: 19px;
-  text-decoration: line-through;
-}
-
-.product-card__price strong {
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 24px;
-}
-
-.product-card__auction {
-  align-self: center;
-  margin: 0;
-  color: #665f5b;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 21px;
-}
-
-.purchase-button {
-  display: inline-flex;
-  width: 118px;
-  height: 48px;
-  flex: 0 0 118px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 9px;
-  border: 1px solid var(--color-action);
-  color: #fff;
-  background: var(--color-action);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 18px;
-  white-space: nowrap;
-  transition: background-color 160ms ease, border-color 160ms ease;
-}
-
-.purchase-button:hover:not(:disabled) {
-  border-color: var(--color-action-hover);
-  background: var(--color-action-hover);
-}
-
-.purchase-button:disabled {
-  cursor: default;
-}
-
-.purchase-button--processing {
-  border-color: #7d6963;
-  background: #7d6963;
-  font-size: 10px;
-}
-
-.purchase-button--in-cart {
-  border-color: var(--color-action-soft);
-  background: var(--color-action-soft);
-  font-size: 13px;
-}
-
-.purchase-button svg {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  fill: none;
-  stroke: currentColor;
-}
-
-.purchase-button__spinner {
-  animation: spin 750ms linear infinite;
-  stroke-dasharray: 42 18;
-  stroke-linecap: round;
-  stroke-width: 2;
-}
-
-.purchase-button__check {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (max-width: 1279px) {
   .product-card {
     width: 100%;
@@ -295,7 +233,8 @@ export default {
   }
 
   .product-card__image-button,
-  .product-card__image {
+  .product-card__image,
+  .product-card__image-placeholder {
     height: 187px;
   }
 
