@@ -32,8 +32,8 @@
 </template>
 
 <script>
-import { isProductAvailable } from '../../domain/product';
-import { isPurchaseState, PURCHASE_STATE } from '../../domain/purchase';
+import { isProductAvailable } from '../../utils/catalog';
+import { isPurchaseState, PURCHASE_STATE } from '../../utils/purchase';
 import BaseModal from '../ui/BaseModal.vue';
 import ProductPrice from '../ui/ProductPrice.vue';
 import PurchaseButton from '../ui/PurchaseButton.vue';

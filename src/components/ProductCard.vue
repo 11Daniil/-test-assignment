@@ -51,8 +51,8 @@
 </template>
 
 <script>
-import { isProductAvailable, PRODUCT_STATUS } from '../domain/product';
-import { isPurchaseState, PURCHASE_STATE } from '../domain/purchase';
+import { isProductAvailable, PRODUCT_STATUS } from '../utils/catalog';
+import { isPurchaseState, PURCHASE_STATE } from '../utils/purchase';
 import ProductPrice from './ui/ProductPrice.vue';
 import PurchaseButton from './ui/PurchaseButton.vue';
 

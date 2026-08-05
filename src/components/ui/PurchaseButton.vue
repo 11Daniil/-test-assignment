@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { getPurchaseStateLabel, isPurchaseState, PURCHASE_STATE } from '../../domain/purchase';
+import { getPurchaseStateLabel, isPurchaseState, PURCHASE_STATE } from '../../utils/purchase';
 
 const BUTTON_VARIANTS = ['compact', 'wide'];
 

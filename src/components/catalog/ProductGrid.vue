@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { PURCHASE_STATE } from '../../domain/purchase';
+import { PURCHASE_STATE } from '../../utils/purchase';
 import ProductCard from '../ProductCard.vue';
 
 export default {

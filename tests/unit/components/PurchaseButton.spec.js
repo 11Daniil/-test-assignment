@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import PurchaseButton from '../../../src/components/ui/PurchaseButton.vue';
-import { PURCHASE_STATE } from '../../../src/domain/purchase';
+import { PURCHASE_STATE } from '../../../src/utils/purchase';
 
 describe('PurchaseButton', () => {
   it('emits a purchase request from the idle state', async () => {

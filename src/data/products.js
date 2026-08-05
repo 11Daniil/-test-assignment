@@ -1,4 +1,4 @@
-import { createProduct, PRODUCT_STATUS } from '../domain/product';
+import { PRODUCT_STATUS } from '../utils/catalog';
 
 const commonsImage = (fileName, width) =>
   `https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(
@@ -17,10 +17,10 @@ const createGalleryImage = ({ productId, title, fileName, position, zoom }, inde
 const createGallery = (productId, title, images) =>
   images.map((image, index) => createGalleryImage({ productId, title, ...image }, index));
 
-export const DEFAULT_CART_PRODUCT_IDS = Object.freeze(['creation-adam']);
+export const DEFAULT_CART_PRODUCT_IDS = ['creation-adam'];
 
-export const products = Object.freeze([
-  createProduct({
+export const products = [
+  {
     id: 'venus',
     title: 'Рождение Венеры',
     author: 'Сандро Боттичелли',
@@ -44,8 +44,8 @@ export const products = Object.freeze([
         zoom: 1.7,
       },
     ]),
-  }),
-  createProduct({
+  },
+  {
     id: 'last-supper',
     title: 'Тайная вечеря',
     author: 'Леонардо да Винчи',
@@ -69,8 +69,8 @@ export const products = Object.freeze([
         zoom: 1.8,
       },
     ]),
-  }),
-  createProduct({
+  },
+  {
     id: 'creation-adam',
     title: 'Сотворение Адама',
     author: 'Микеланджело',
@@ -94,8 +94,8 @@ export const products = Object.freeze([
         zoom: 1.9,
       },
     ]),
-  }),
-  createProduct({
+  },
+  {
     id: 'anatomy-lesson',
     title: 'Урок анатомии',
     author: 'Рембрандт',
@@ -115,7 +115,7 @@ export const products = Object.freeze([
         zoom: 1.75,
       },
     ]),
-  }),
-]);
+  },
+];
 
 export default products;

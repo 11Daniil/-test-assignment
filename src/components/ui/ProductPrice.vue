@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import { formatMoney, isProductAvailable } from '../../domain/product';
+import { formatPrice, isProductAvailable } from '../../utils/catalog';
 
 const PRICE_VARIANTS = ['card', 'modal'];
 
@@ -32,7 +32,7 @@ export default {
     },
     currentPrice() {
       return this.isAvailable
-        ? formatMoney(this.product.price.current, this.product.price.currency)
+        ? formatPrice(this.product.price.current, this.product.price.currency)
         : '';
     },
     previousPrice() {
@@ -40,7 +40,7 @@ export default {
         return '';
       }
 
-      return formatMoney(this.product.price.previous, this.product.price.currency);
+      return formatPrice(this.product.price.previous, this.product.price.currency);
     },
   },
 };

@@ -28,14 +28,14 @@ import {
   filterProductsByTitle,
   getSearchResultLabel,
   isProductAvailable,
-} from '../../domain/product';
+} from '../../utils/catalog';
 import {
-  collectCartProductIds,
-  createInitialPurchaseStates,
-  createPurchaseScheduler,
+  createPurchaseStates,
+  getCartIds,
+  PURCHASE_DELAY,
   PURCHASE_STATE,
-} from '../../domain/purchase';
-import { cartRepository, CART_LOAD_STATUS } from '../../repositories/cartRepository';
+} from '../../utils/purchase';
+import { loadCart, saveCart } from '../../utils/cartStorage';
 import ProductDetailsModal from '../product/ProductDetailsModal.vue';
 import ProductGrid from './ProductGrid.vue';
 
@@ -69,37 +69,23 @@ export default {
       return products.find((product) => product.id === this.selectedProductId) || null;
     },
   },
-  beforeCreate() {
-    this.purchaseScheduler = null;
-  },
   created() {
-    this.initializePurchaseState();
-    this.purchaseScheduler = createPurchaseScheduler({
-      onComplete: this.completePurchase,
-    });
+    this.purchaseTimers = new Map();
+    this.loadPurchaseStates();
   },
   beforeDestroy() {
-    if (this.purchaseScheduler) {
-      this.purchaseScheduler.cancelAll();
-    }
+    this.purchaseTimers.forEach((timerId) => clearTimeout(timerId));
+    this.purchaseTimers.clear();
   },
   methods: {
-    initializePurchaseState() {
+    loadPurchaseStates() {
       const productIds = products.map((product) => product.id);
-      const storedCart = cartRepository.load(productIds);
-      const shouldUseStoredCart = storedCart.status === CART_LOAD_STATUS.LOADED;
-      const initialCartIds = shouldUseStoredCart ? storedCart.productIds : DEFAULT_CART_PRODUCT_IDS;
+      const savedCart = loadCart(productIds);
 
-      this.purchaseStates = createInitialPurchaseStates(products, initialCartIds);
-
-      const shouldPersistInitialState =
-        storedCart.status === CART_LOAD_STATUS.MISSING ||
-        storedCart.status === CART_LOAD_STATUS.INVALID ||
-        storedCart.needsMigration;
-
-      if (shouldPersistInitialState) {
-        this.persistCart();
-      }
+      this.purchaseStates = createPurchaseStates(
+        products,
+        savedCart === null ? DEFAULT_CART_PRODUCT_IDS : savedCart,
+      );
     },
     getPurchaseState(productId) {
       return this.purchaseStates[productId] || PURCHASE_STATE.IDLE;
@@ -117,13 +103,20 @@ export default {
         !product ||
         !isProductAvailable(product) ||
         this.getPurchaseState(productId) !== PURCHASE_STATE.IDLE ||
-        !this.purchaseScheduler.schedule(productId)
+        this.purchaseTimers.has(productId)
       ) {
         return;
       }
 
       this.$set(this.purchaseStates, productId, PURCHASE_STATE.PROCESSING);
       this.liveMessage = `${product.title}: покупка обрабатывается`;
+
+      const timerId = setTimeout(() => {
+        this.purchaseTimers.delete(productId);
+        this.completePurchase(productId);
+      }, PURCHASE_DELAY);
+
+      this.purchaseTimers.set(productId, timerId);
     },
     completePurchase(productId) {
       if (this.getPurchaseState(productId) !== PURCHASE_STATE.PROCESSING) {
@@ -139,7 +132,7 @@ export default {
       }
     },
     persistCart() {
-      return cartRepository.save(collectCartProductIds(products, this.purchaseStates));
+      return saveCart(getCartIds(products, this.purchaseStates));
     },
   },
 };

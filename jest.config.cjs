@@ -1,11 +1,6 @@
 module.exports = {
   clearMocks: true,
-  collectCoverageFrom: [
-    'src/domain/**/*.js',
-    'src/repositories/**/*.js',
-    'src/components/**/*.{js,vue}',
-    '!src/components/SiteFooter.vue',
-  ],
+  collectCoverageFrom: ['src/utils/**/*.js', 'src/components/**/*.{js,vue}'],
   coverageDirectory: 'coverage',
   moduleFileExtensions: ['js', 'json', 'vue'],
   roots: ['<rootDir>/tests'],
